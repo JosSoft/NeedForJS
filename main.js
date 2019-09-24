@@ -2,6 +2,17 @@ const score = document.querySelector('.score'),
     start = document.querySelector('.start'),
     gameArea = document.querySelector('.gameArea')
 
+// вер.1
+//const music = document.createElement('audio')
+//music.setAttribute('autoplay', true)
+//music.setAttribute('src', './audio.mp3')
+//music.setAttribute('controls', true)
+// вер.2
+const music = document.createElement('embed')
+music.setAttribute('src', './audio.mp3')
+music.setAttribute('type', 'audio/mp3')
+music.classList.add('music')
+
 const car = document.createElement('div')
 car.classList.add('car')
 
@@ -20,18 +31,19 @@ const keys = {
 const settings = {
     start: false,
     score: 0,
-    speed: 5,
+    speed: 8,
     traffic: 3
 }
 
-function getQuantityElements(heightElement) {
-    return document.documentElement.clientHeight / heightElement + 1
+const getQuantityElements = (heightElement) => {
+    return Math.ceil(gameArea.offsetHeight / heightElement)
 }
 
 function startGame() {
     start.classList.add('hide')
 
-    for (let i = 0; i < getQuantityElements(100); i++) {
+    //for (let i = 0; i < getQuantityElements(100); i++) {
+    for (let i = 0; i < getQuantityElements(100) + 1; i++) {
         const line = document.createElement('div')
         line.classList.add('line')
         line.style.top = (i * 100) + 'px'
@@ -43,7 +55,8 @@ function startGame() {
         const enemy = document.createElement('div')
         enemy.classList.add('enemy')
         enemy.y = -100 * settings.traffic * (i + 1)
-        enemy.style.left = Math.floor(Math.random() * (gameArea.offsetWidth - 50)) + 'px'
+        //enemy.style.left = Math.floor(Math.random() * (gameArea.offsetWidth - 50)) + 'px'
+        enemy.style.left = getRandomInt(0, gameArea.offsetWidth - 50) + 'px'
         enemy.style.top = enemy.y + 'px'
         //enemy.style.background = 'transparent url(./image/enemy2.png) center / cover no-repeat';
         enemy.style.background = `transparent url(./image/enemy${getRandomInt(0,1)}.png) center / cover no-repeat`;
@@ -52,9 +65,16 @@ function startGame() {
 
     settings.start = true
     gameArea.appendChild(car)
+
+    gameArea.appendChild(music)
+
     settings.x = car.offsetLeft
     settings.y = car.offsetTop
     requestAnimationFrame(playGame)
+
+    //setTimeout(() => {
+    //    settings.start = false
+    //}, 10000)
 }
 
 function playGame() {
@@ -79,17 +99,28 @@ function playGame() {
         car.style.top = settings.y + 'px'
 
         requestAnimationFrame(playGame)
+    } else {
+        music.remove()
     }
 }
 
 function startRun(event) {
     event.preventDefault()
-    keys[event.key] = true
+    // вар.1    
+    //    if (keys.hasOwnProperty(event.key)) {
+    //        keys[event.key] = true
+    //    }
+    // вар.2
+    if (event.key in keys) {
+        keys[event.key] = true
+    }
 }
 
 function stopRun(event) {
     event.preventDefault()
-    keys[event.key] = false
+    if (keys.hasOwnProperty(event.key)) {
+        keys[event.key] = false
+    }
 }
 
 function moveRoad() {
@@ -98,7 +129,7 @@ function moveRoad() {
         line.y += settings.speed
         line.style.top = line.y + 'px'
 
-        if (line.y >= document.documentElement.clientHeight) {
+        if (line.y >= gameArea.offsetHeight) {
             line.y = -100
         }
 
@@ -111,7 +142,7 @@ function moveEnemy() {
         item.y += settings.speed / 2
         item.style.top = item.y + 'px'
 
-        if (item.y >= document.documentElement.clientHeight) {
+        if (item.y >= gameArea.offsetHeight) {
             item.y = -100 * settings.traffic
 
             item.style.left = getRandomInt(0, gameArea.offsetWidth - 50) + 'px'
@@ -122,10 +153,3 @@ function moveEnemy() {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-/* ВОПРОС: в CSS 
-.gameArea {
-    height: 100%; не работает, убегает верх. Использую браузер Opera. 
-    Помогает если изменить на:
-    height: 100vh;
-*/

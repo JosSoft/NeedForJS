@@ -160,3 +160,24 @@ table {
     background: #fff;
     left: 145px;
 }
+
+.line1 {
+    position: absolute;
+    width: 1px;
+    height: 100vh;
+    background: #696969;
+    left: 72px;
+}
+
+.line2 {
+    position: absolute;
+    width: 1px;
+    height: 100vh;
+    background: #696969;
+    left: 228px;
+}
+
+.music {
+    position: absolute;
+    top: -200px
+}
