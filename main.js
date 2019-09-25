@@ -9,24 +9,22 @@ const score = document.querySelector('.score'),
 //music.setAttribute('controls', true)
 
 // вер.2 кросбраузерная версия
-const music = document.createElement('embed')
-music.setAttribute('src', './audio.mp3')
-music.setAttribute('type', 'audio/mp3')
-music.classList.add('music')
+//const music = document.createElement('embed')
+//music.setAttribute('src', './audio.mp3')
+//music.setAttribute('type', 'audio/mp3')
+//music.classList.add('music')
+
+// вер.3 
+const audio = new Audio('./audio.mp3');
+const crash = new Audio('./crash.mp3');
+let allow = false
+audio.addEventListener('loadeddata', () => allow = true)
+
 
 const car = document.createElement('div')
 car.classList.add('car')
 
-//start.addEventListener('click', startGame)
-const levels = document.querySelectorAll('p')
-levels.forEach(level => {
-    // так и смог понять как определить, на каком уровне нажата    
-    level.addEventListener('click', startGame)
-})
 
-
-document.addEventListener('keydown', startRun)
-document.addEventListener('keyup', stopRun)
 
 const keys = {
     ArrowUp: false,
@@ -38,16 +36,33 @@ const keys = {
 const settings = {
     start: false,
     score: 0,
-    speed: 3,
-    traffic: 3
+    speed: 5,
+    traffic: 3,
+    level: 0
 }
 
 const getQuantityElements = (heightElement) => {
     return Math.ceil(gameArea.offsetHeight / heightElement)
 }
 
-function startGame() {
-    // стартуем
+const startGame = (event) => {
+    console.log('event: ', event.target);
+    if (event.target.classList.contains('start')) {
+        return
+    }
+    if (event.target.classList.contains('easy')) {
+        settings.speed = 3
+        settings.traffic = 3
+    }
+    if (event.target.classList.contains('medium')) {
+        settings.speed = 5
+        settings.traffic = 2
+    }
+    if (event.target.classList.contains('hard')) {
+        settings.speed = 7
+        settings.traffic = 1
+    }
+
     start.classList.add('hide')
     gameArea.innerHTML = ''
 
@@ -66,19 +81,19 @@ function startGame() {
         enemy.y = -100 * settings.traffic * (i + 1)
         enemy.style.left = getRandomInt(0, gameArea.offsetWidth - 50) + 'px'
         enemy.style.top = enemy.y + 'px'
-        enemy.style.background = `transparent url(./image/enemy${getRandomInt(0,2)}.png) center / cover no-repeat`;
+        enemy.style.background = `transparent url(./image/enemy${getRandomInt(1, 3)}.png) center / cover no-repeat`;
         gameArea.appendChild(enemy)
     }
 
     settings.score = 0
-    settings.speed = 3
     settings.start = true
     gameArea.appendChild(car)
     car.style.left = (gameArea.offsetWidth / 2 - car.offsetWidth / 2) + 'px'
     car.style.top = 'auto'
     car.style.bottom = '10px'
 
-    gameArea.appendChild(music)
+    //gameArea.appendChild(music)
+    if (allow) audio.play()
 
     settings.x = car.offsetLeft
     settings.y = car.offsetTop
@@ -89,12 +104,13 @@ function startGame() {
     //}, 10000)
 }
 
-function playGame() {
+const playGame = () => {
     settings.score += settings.speed
     // увеличение скорости
     if (settings.score > 1000 * (settings.speed * (settings.speed - 2))) {
         settings.speed += 1
     }
+
     // кол-во очков и скорость
     score.innerHTML = `SCORE: ${settings.score}<br>
                        SPEED: ${settings.speed}<br>
@@ -103,26 +119,24 @@ function playGame() {
     moveRoad()
     moveEnemy()
 
+    if (keys.ArrowLeft && settings.x > 0) {
+        settings.x -= settings.speed
+    }
+    if (keys.ArrowRight && settings.x < (gameArea.offsetWidth - car.offsetWidth)) {
+        settings.x += settings.speed
+    }
+    if (keys.ArrowUp && settings.y > 0) {
+        settings.y -= settings.speed
+    }
+    if (keys.ArrowDown && settings.y < (gameArea.offsetHeight - car.offsetHeight)) {
+        settings.y += settings.speed
+    }
+
+    car.style.left = settings.x + 'px'
+    car.style.top = settings.y + 'px'
+
     if (settings.start) {
-        if (keys.ArrowLeft && settings.x > 0) {
-            settings.x -= settings.speed
-        }
-        if (keys.ArrowRight && settings.x < (gameArea.offsetWidth - car.offsetWidth)) {
-            settings.x += settings.speed
-        }
-        if (keys.ArrowUp && settings.y > 0) {
-            settings.y -= settings.speed
-        }
-        if (keys.ArrowDown && settings.y < (gameArea.offsetHeight - car.offsetHeight)) {
-            settings.y += settings.speed
-        }
-
-        car.style.left = settings.x + 'px'
-        car.style.top = settings.y + 'px'
-
         requestAnimationFrame(playGame)
-    } else {
-        music.remove()
     }
 }
 
@@ -162,11 +176,12 @@ function moveEnemy() {
         // проверка на столкновения
         let carRect = car.getBoundingClientRect()
         let enemyRect = item.getBoundingClientRect()
-        if (carRect.top <= enemyRect.bottom &&
-            carRect.right >= enemyRect.left &&
-            carRect.left <= enemyRect.right &&
-            carRect.bottom >= enemyRect.top) {
+        if (carRect.top + 3 <= enemyRect.bottom &&
+            carRect.right - 3 >= enemyRect.left &&
+            carRect.left + 3 <= enemyRect.right &&
+            carRect.bottom - 3 >= enemyRect.top) {
             // столкновение
+            audio.pause()
             settings.start = false
             console.warn('ДТП')
             start.classList.remove('hide')
@@ -200,3 +215,8 @@ function highScore() {
         localStorage.setItem('HighScore', settings.score)
     }
 }
+
+start.addEventListener('click', startGame)
+
+document.addEventListener('keydown', startRun)
+document.addEventListener('keyup', stopRun)
