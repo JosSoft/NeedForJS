@@ -2,12 +2,13 @@ const score = document.querySelector('.score'),
     start = document.querySelector('.start'),
     gameArea = document.querySelector('.gameArea')
 
-// вер.1
+// вер.1 более современная
 //const music = document.createElement('audio')
 //music.setAttribute('autoplay', true)
 //music.setAttribute('src', './audio.mp3')
 //music.setAttribute('controls', true)
-// вер.2
+
+// вер.2 кросбраузерная версия
 const music = document.createElement('embed')
 music.setAttribute('src', './audio.mp3')
 music.setAttribute('type', 'audio/mp3')
@@ -16,7 +17,13 @@ music.classList.add('music')
 const car = document.createElement('div')
 car.classList.add('car')
 
-start.addEventListener('click', startGame)
+//start.addEventListener('click', startGame)
+const levels = document.querySelectorAll('p')
+levels.forEach(level => {
+    // так и смог понять как определить, на каком уровне нажата    
+    level.addEventListener('click', startGame)
+})
+
 
 document.addEventListener('keydown', startRun)
 document.addEventListener('keyup', stopRun)
@@ -40,9 +47,9 @@ const getQuantityElements = (heightElement) => {
 }
 
 function startGame() {
+    // стартуем
     start.classList.add('hide')
     gameArea.innerHTML = ''
-
 
     //for (let i = 0; i < getQuantityElements(100); i++) {
     for (let i = 0; i < getQuantityElements(100) + 1; i++) {
@@ -59,11 +66,12 @@ function startGame() {
         enemy.y = -100 * settings.traffic * (i + 1)
         enemy.style.left = getRandomInt(0, gameArea.offsetWidth - 50) + 'px'
         enemy.style.top = enemy.y + 'px'
-        enemy.style.background = `transparent url(./image/enemy${getRandomInt(0,1)}.png) center / cover no-repeat`;
+        enemy.style.background = `transparent url(./image/enemy${getRandomInt(0,2)}.png) center / cover no-repeat`;
         gameArea.appendChild(enemy)
     }
 
     settings.score = 0
+    settings.speed = 3
     settings.start = true
     gameArea.appendChild(car)
     car.style.left = (gameArea.offsetWidth / 2 - car.offsetWidth / 2) + 'px'
@@ -83,10 +91,14 @@ function startGame() {
 
 function playGame() {
     settings.score += settings.speed
+    // увеличение скорости
     if (settings.score > 1000 * (settings.speed * (settings.speed - 2))) {
         settings.speed += 1
     }
-    score.innerHTML = `SCORE (${settings.speed})<br> ${settings.score}`
+    // кол-во очков и скорость
+    score.innerHTML = `SCORE: ${settings.score}<br>
+                       SPEED: ${settings.speed}<br>
+                       TRAFFIC: ${settings.traffic}<br>`
 
     moveRoad()
     moveEnemy()
@@ -159,6 +171,8 @@ function moveEnemy() {
             console.warn('ДТП')
             start.classList.remove('hide')
             //start.style.top += start.offsetHeight
+
+            highScore()
         }
 
         item.y += settings.speed / 2
@@ -174,4 +188,15 @@ function moveEnemy() {
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function highScore() {
+    if (localStorage.getItem('HighScore')) {
+        if (settings.score > localStorage.getItem('HighScore')) {
+            localStorage.setItem('HighScore', settings.score)
+            alert(`${settings.score} очков - Новый рекорд!!!`)
+        }
+    } else {
+        localStorage.setItem('HighScore', settings.score)
+    }
 }
