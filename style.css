@@ -163,7 +163,7 @@ table {
 
 .line1 {
     position: absolute;
-    width: 1px;
+    width: 2px;
     height: 100vh;
     background: #696969;
     left: 72px;
@@ -171,7 +171,7 @@ table {
 
 .line2 {
     position: absolute;
-    width: 1px;
+    width: 2px;
     height: 100vh;
     background: #696969;
     left: 228px;
@@ -180,4 +180,37 @@ table {
 .music {
     position: absolute;
     top: -200px
+}
+
+.start {
+    position: absolute;
+    left: 0;
+    top: 200px;
+    width: 100%;
+    margin: 0;
+    padding: 2rem 0;
+    text-align: center;
+    z-index: 200;
+    color: #fff;
+    font-size: 1.5rem;
+    background: black;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-weight: 700;
+}
+
+.score {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1rem 0;
+    text-align: center;
+    z-index: 200;
+    color: red;
+    font-size: 2.5rem;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-weight: 500;
 }

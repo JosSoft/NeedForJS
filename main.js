@@ -31,7 +31,7 @@ const keys = {
 const settings = {
     start: false,
     score: 0,
-    speed: 8,
+    speed: 3,
     traffic: 3
 }
 
@@ -41,6 +41,8 @@ const getQuantityElements = (heightElement) => {
 
 function startGame() {
     start.classList.add('hide')
+    gameArea.innerHTML = ''
+
 
     //for (let i = 0; i < getQuantityElements(100); i++) {
     for (let i = 0; i < getQuantityElements(100) + 1; i++) {
@@ -55,16 +57,18 @@ function startGame() {
         const enemy = document.createElement('div')
         enemy.classList.add('enemy')
         enemy.y = -100 * settings.traffic * (i + 1)
-        //enemy.style.left = Math.floor(Math.random() * (gameArea.offsetWidth - 50)) + 'px'
         enemy.style.left = getRandomInt(0, gameArea.offsetWidth - 50) + 'px'
         enemy.style.top = enemy.y + 'px'
-        //enemy.style.background = 'transparent url(./image/enemy2.png) center / cover no-repeat';
         enemy.style.background = `transparent url(./image/enemy${getRandomInt(0,1)}.png) center / cover no-repeat`;
         gameArea.appendChild(enemy)
     }
 
+    settings.score = 0
     settings.start = true
     gameArea.appendChild(car)
+    car.style.left = (gameArea.offsetWidth / 2 - car.offsetWidth / 2) + 'px'
+    car.style.top = 'auto'
+    car.style.bottom = '10px'
 
     gameArea.appendChild(music)
 
@@ -78,6 +82,12 @@ function startGame() {
 }
 
 function playGame() {
+    settings.score += settings.speed
+    if (settings.score > 1000 * (settings.speed * (settings.speed - 2))) {
+        settings.speed += 1
+    }
+    score.innerHTML = `SCORE (${settings.speed})<br> ${settings.score}`
+
     moveRoad()
     moveEnemy()
 
@@ -106,11 +116,7 @@ function playGame() {
 
 function startRun(event) {
     event.preventDefault()
-    // вар.1    
-    //    if (keys.hasOwnProperty(event.key)) {
-    //        keys[event.key] = true
-    //    }
-    // вар.2
+    // вар.1 более новый
     if (event.key in keys) {
         keys[event.key] = true
     }
@@ -118,6 +124,7 @@ function startRun(event) {
 
 function stopRun(event) {
     event.preventDefault()
+    // вар.2 более быстрый   
     if (keys.hasOwnProperty(event.key)) {
         keys[event.key] = false
     }
@@ -139,6 +146,21 @@ function moveRoad() {
 function moveEnemy() {
     let enemy = document.querySelectorAll('.enemy')
     enemy.forEach(item => {
+
+        // проверка на столкновения
+        let carRect = car.getBoundingClientRect()
+        let enemyRect = item.getBoundingClientRect()
+        if (carRect.top <= enemyRect.bottom &&
+            carRect.right >= enemyRect.left &&
+            carRect.left <= enemyRect.right &&
+            carRect.bottom >= enemyRect.top) {
+            // столкновение
+            settings.start = false
+            console.warn('ДТП')
+            start.classList.remove('hide')
+            //start.style.top += start.offsetHeight
+        }
+
         item.y += settings.speed / 2
         item.style.top = item.y + 'px'
 
